@@ -3,12 +3,12 @@ getgenv().SpeedEnabled = true
 getgenv().Heal100 = true
 
 function TPAutoFramA()
-		while wait() do
+		
 			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-60.7853699, 28.0049992, -326.502686, 0, -1, 0, 1, 0, -0, 0, 0, 1)
 			game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
 	    end
-    end
-end
+   
+
 
 
 function AutoFramA()
@@ -16,7 +16,7 @@ function AutoFramA()
 		game:GetService("ReplicatedStorage").RemoteEvents.GeneralAttack:FireServer()
 		end
 	end
-end
+
 
 
 
@@ -234,7 +234,7 @@ local Window = OrionLib:MakeWindow({Name = "Seanual HUB BETA", HidePremium = fal
 
 
 local Auto = Window:MakeTab({
-	Name = "ฟั่งชั่นหีแม่มึงระเบิด",
+	Name = "ฟังชั้นใช้แ้ลวหีแม่มึงระเบิด",
 	Icon = "rbxassetid://259820115",
 	PremiumOnly = false
 })
@@ -249,7 +249,7 @@ Auto:AddButton({
 })
 
 Auto:AddToggle({
-	Name = "ปั้มสปีดแบบชิวๆ(Only Synapse X) MAP Speed Run Simulator ⚡",
+	Name = "ปั้มสปีดแบบชิวๆ(Only Synapse X)MAP Speed Run Simulator ⚡",
 	Callback = function()
 		autoOrbsEnabled = not autoOrbsEnabled
 		autoOrbs()
@@ -284,21 +284,21 @@ for i, player in ipairs(game.Players:GetPlayers()) do
 end
 
 Auto:AddButton({
-	Name = "ตีออโต้ MAP BLOXFRUIT",
+	Name = "ตีออโต้ MAP BLOXFRU",
 	Callback = function()
 		FastAttack()
 	  end    
 })
 
 Auto:AddButton({
-	Name = "ดึงม่อนเกาะ1 MAP BLOXFRUIT",
+	Name = "ดึงม่อนเกาะ1 MAP BLOXFR",
 	Callback = function()
 		bringmob1()
 	  end    
 })
 
 Auto:AddButton({
-	Name = "ฟามม่อนเกาะ1 MAP BLOXFRUIT",
+	Name = "ฟามม่อนเกาะ1 MAP BLOXFRU",
 	Callback = function()
 		AutoFram1()
 	  end    
@@ -312,7 +312,7 @@ Auto:AddButton({
 })
 
 Auto:AddButton({
-	Name = "วาปไปตีมอนAFK MAP Demon Soul Simulator",
+	Name = "วาปไปตีมอนAFK MAP Demon Soul Simulato",
 	Callback = function()
 		TPAutoFramA()
 	  end    
