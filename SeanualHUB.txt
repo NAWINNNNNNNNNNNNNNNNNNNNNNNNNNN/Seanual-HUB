@@ -1,0 +1,379 @@
+getgenv().autoOrbsEnabled = true
+getgenv().SpeedEnabled = true
+getgenv().Heal100 = true
+getgenv().infiniteJumpEnabled = true
+
+function infiniteJump()
+	task.spawn(function()
+		local character = game.Players.LocalPlayer.Character
+		local humanoid = character:FindFirstChild("Humanoid")
+		while true do
+			if not infiniteJumpEnabled then break end
+			if humanoid.Jump and humanoid.FloorMaterial == Enum.Material.Air then
+				humanoid.JumpPower = 50
+				humanoid:ChangeState("Jumping")
+			end
+			wait()
+		end
+	end)
+end
+
+
+
+function TPAutoFramA()
+		
+			game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-60.7853699, 28.0049992, -326.502686, 0, -1, 0, 1, 0, -0, 0, 0, 1)
+			game.Players.LocalPlayer.Character.HumanoidRootPart.Anchored = false
+	    end
+   
+
+
+
+function AutoFramA()
+	while wait() do 
+		game:GetService("ReplicatedStorage").RemoteEvents.GeneralAttack:FireServer()
+		end
+	end
+
+
+
+
+function AutoFram1()
+	task.spawn(function()
+		_G.Farm = true
+function CheckQuest()
+   local Lv = game.Players.LocalPlayer.Data.Level.Value
+    if Lv == 1 or Lv <= 999 then
+    Ms = "Bandit [Lv. 5]"
+    NM = "Bandit"
+    LQ = 1
+    NQ = "BanditQuest1"
+    CQ = CFrame.new(1389.74451, 88.1519318, -1298.90796, -0.342042685, 0, 0.939684391, 0, 1, 0, -0.939684391, 0, -0.342042685)
+    end
+end
+
+
+function TP(P)
+    Distance = (P.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+    if Distance < 10 then
+        Speed = 1000
+    elseif Distance < 170 then
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = P
+        Speed = 350
+    elseif Distance < 1000 then
+        Speed = 350
+    elseif Distance >= 1000 then
+        Speed = 300
+    end
+    game:GetService("TweenService"):Create(
+        game.Players.LocalPlayer.Character.HumanoidRootPart,
+        TweenInfo.new(Distance/Speed, Enum.EasingStyle.Linear),
+        {CFrame = P}
+    ):Play()
+end
+
+spawn(function()
+   while task.wait() do
+       if _G.Farm then
+           CheckQuest()
+           if game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == false then
+                TP(CQ)
+                wait(0.9)
+                game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("StartQuest",NQ,LQ)
+                elseif game:GetService("Players").LocalPlayer.PlayerGui.Main.Quest.Visible == true then
+                    for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+                        if v.Name == Ms then
+                        TP(v.HumanoidRootPart.CFrame * CFrame.new(0,20,0))
+                        v.HumanoidRootPart.Size = Vector3.new(60,60,60)
+                    end
+                end
+            end
+        end
+    end
+end)
+end)
+end
+
+function bringmob1()
+	task.spawn(function()
+		_G.bringmob = true
+		while _G.bringmob do wait()
+			pcall(function()
+		for i,v in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+		for x,y in pairs(game:GetService("Workspace").Enemies:GetChildren()) do
+		if v.Name == "Bandit [Lv. 5]" then
+			if y.Name == "Bandit [Lv. 5]" then
+		   v.HumanoidRootPart.CFrame = y.HumanoidRootPart.CFrame
+		   v.HumanoidRootPart.Size = Vector3.new(60,60,60)
+		   y.HumanoidRootPart.Size = Vector3.new(60,60,60)
+		   v.HumanoidRootPart.Transparency = 1
+		   v.HumanoidRootPart.CanCollide = false
+		   y.HumanoidRootPart.CanCollide = false
+		   v.Humanoid.WalkSpeed = 0
+		   y.Humanoid.WalkSpeed = 0
+		   v.Humanoid.JumpPower = 0
+		   y.Humanoid.JumpPower = 0
+		   if sethiddenproperty then
+			 sethiddenproperty(game.Players.LocalPlayer, "SimulationRadius", math.huge)
+		end
+		end
+		end
+		end
+		end
+		end)
+		end
+ end)	
+end	
+
+
+function FastAttack()
+	task.spawn(function() 
+		local CombatFramework = require(game:GetService("Players").LocalPlayer.PlayerScripts.CombatFramework)
+    local Camera = require(game.ReplicatedStorage.Util.CameraShaker)
+    Camera:Stop()
+    coroutine.wrap(function()
+        game:GetService("RunService").Stepped:Connect(function()
+            if getupvalues(CombatFramework)[2]['activeController'].timeToNextAttack then
+                getupvalues(CombatFramework)[2]['activeController'].timeToNextAttack = 0
+                getupvalues(CombatFramework)[2]['activeController'].hitboxMagnitude = 25
+                getupvalues(CombatFramework)[2]['activeController']:attack()
+            end
+        end)
+    end)()
+end)
+end
+
+function autoOrbs()
+	task.spawn(function()
+		local character = game.Players.LocalPlayer.Character
+		local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+
+		while wait() do
+			if not autoOrbsEnabled then break end
+			for i,v in pairs(game:GetService("Workspace").OrbSpawns:GetChildren()) do
+				firetouchinterest(humanoidRootPart, v, 0)
+			end
+		end
+	end)
+end
+
+function AutoHop(player)
+	task.spawn(function() 
+	local PlaceID = game.PlaceId
+	local AllIDs = {}
+	local foundAnything = ""
+	local actualHour = os.date("!*t").hour
+	local Deleted = false
+	function TPReturner()
+		local Site;
+		if foundAnything == "" then
+			Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
+		else
+			Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+		end
+		local ID = ""
+		if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
+			foundAnything = Site.nextPageCursor
+		end
+		local num = 0;
+		for i,v in pairs(Site.data) do
+			local Possible = true
+			ID = tostring(v.id)
+			if tonumber(v.maxPlayers) > tonumber(v.playing) then
+				for _,Existing in pairs(AllIDs) do
+					if num ~= 0 then
+						if ID == tostring(Existing) then
+							Possible = false
+						end
+					else
+						if tonumber(actualHour) ~= tonumber(Existing) then
+							local delFile = pcall(function()
+								AllIDs = {}
+								table.insert(AllIDs, actualHour)
+							end)
+						end
+					end
+					num = num + 1
+				end
+				if Possible == true then
+					table.insert(AllIDs, ID)
+					wait()
+					pcall(function()
+						wait()
+						game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
+					end)
+					wait(4)
+				end
+			end
+		end
+	end
+	function Teleport() 
+		while wait() do
+			pcall(function()
+				TPReturner()
+				if foundAnything ~= "" then
+					TPReturner()
+				end
+			end)
+		end
+	end
+	Teleport()
+end)                   
+
+function isnil(thing)
+	return (thing == nil)
+end
+local function round(n)
+	return math.floor(tonumber(n) + 0.5)
+end
+Number = math.random(1, 1000000)
+
+
+end
+
+
+
+
+function teleportTo(player)    
+	local localPlayer = game.Players.LocalPlayer
+	localPlayer.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame  
+	wait()        
+end
+
+function Speed()
+	task.spawn(function() 
+		game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 100
+    end)
+end
+
+		
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Window = OrionLib:MakeWindow({Name = "Seanual HUB BETA", HidePremium = false, SaveConfig = true, ConfigFolder = "SpeedRunSimulator", IntroText = "Seanual HUB"})
+
+
+local Auto = Window:MakeTab({
+	Name = "ฟังชั้นใช้ได้เกือบทุกแมพ",
+	Icon = "rbxassetid://259820115",
+	PremiumOnly = false
+})
+
+
+
+Auto:AddButton({
+	Name = "Hop ใช้ได้ทุกแมพ",
+	Callback = function()
+		AutoHop(player)
+	end
+})
+
+
+Auto:AddButton({
+	Name = "วิ่งไว ใช้ได้ทุกแมพ",
+	Callback = function()
+		Speed()
+	  end    
+})
+
+
+local TeleportTo = Window:MakeTab({
+	Name = "Teleport Player",
+	Icon = "rbxassetid://259820115",
+	PremiumOnly = false
+})
+
+TeleportTo:AddSection({
+	Name = "Teleport To A Player"
+})
+
+for i, player in ipairs(game.Players:GetPlayers()) do
+	TeleportTo:AddButton({
+		Name = player.Name,
+		Callback = function()
+			teleportTo(player)
+		end
+	})
+end
+
+---Demon Soul Simulator
+
+local GAY = Window:MakeTab({
+	Name = "MAP Demon Soul Simulator ",
+	Icon = "rbxassetid://259820115",
+	PremiumOnly = false
+})
+
+GAY:AddButton({
+	Name = "ตีออโต้ MAP Demon Soul Simulator",
+	Callback = function()
+		AutoFramA()
+	  end    
+})
+
+GAY:AddButton({
+	Name = "วาปไปตีมอนAFK MAP Demon Soul Simulator",
+	Callback = function()
+		TPAutoFramA()
+	  end    
+})
+
+
+---BLOXFRUIT
+
+
+local NARAK = Window:MakeTab({
+	Name = "MAP BLOXFRUIT ",
+	Icon = "rbxassetid://259820115",
+	PremiumOnly = false
+})
+
+
+NARAK:AddButton({
+	Name = "ตีออโต้ MAP BLOXFRU",
+	Callback = function()
+		FastAttack()
+	  end    
+})
+
+NARAK:AddButton({
+	Name = "ดึงม่อนเกาะ1 MAP BLOXFR",
+	Callback = function()
+		bringmob1()
+	  end    
+})
+
+NARAK:AddButton({
+	Name = "ฟามม่อนเกาะ1 MAP BLOXFRU",
+	Callback = function()
+		AutoFram1()
+	  end    
+})
+
+
+
+---MAP Speed Run Simulator ⚡
+
+local NAHEE = Window:MakeTab({
+	Name = " Speed Run Simulator ",
+	Icon = "rbxassetid://259820115",
+	PremiumOnly = false
+})
+
+
+
+NAHEE:AddToggle({
+	Name = "ปั้มสปีดแบบชิวๆ (Only Synapse X) MAP Speed Run Simulator ⚡",
+	Callback = function()
+		autoOrbsEnabled = not autoOrbsEnabled
+		autoOrbs()
+	  end    
+})
+
+------------------------------------------------------
+Auto:AddToggle({
+	Name = "กระโดดไม่จำกัด  ใช้ได้ทุกแมพ ⚡",
+	Callback = function()
+		infiniteJumpEnabled = not infiniteJumpEnabled
+            infiniteJump()
+	  end    
+})
+------------------------------------------------------
