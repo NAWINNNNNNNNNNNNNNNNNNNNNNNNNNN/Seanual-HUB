@@ -7,6 +7,15 @@ getgenv().infiniteJumpEnabled = true
 getgenv().setTradingEnabled = true
 getgenv().AimbotEnabled = true
 
+function MARUHUB()
+	task.spawn(function()
+		(getgenv()).key = "MARUCEVQPJZVTJ2XC3E1Y8JO3R";
+(getgenv()).id = "616254372069769216";
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xshiba/MaruComkak/main/PCBit.lua"))()
+	end)
+end
+
+
 
 function MDR1()
 	task.spawn(function()
@@ -996,23 +1005,30 @@ local NARAK = Window:MakeTab({
 	PremiumOnly = false
 })
 
+NARAK:AddButton({
+	Name = "MARUHUB ของกู",
+	Callback = function()
+		MARUHUB()
+	  end    
+})
+
 
 NARAK:AddButton({
-	Name = "ตีออโต้ MAP BLOXFRU",
+	Name = "ตีออโต้ MAP BLOXFRUIT",
 	Callback = function()
 		FastAttack()
 	  end    
 })
 
 NARAK:AddButton({
-	Name = "ดึงม่อนเกาะ1 MAP BLOXFR",
+	Name = "ดึงม่อนเกาะ1 MAP BLOXFRUIT",
 	Callback = function()
 		bringmob1()
 	  end    
 })
 
 NARAK:AddButton({
-	Name = "ฟามม่อนเกาะ1 MAP BLOXFRU",
+	Name = "ฟามม่อนเกาะ1 MAP BLOXFRUIT",
 	Callback = function()
 		AutoFram1()
 	  end    
@@ -1219,3 +1235,5 @@ AZA:AddButton({
 		MDR1()
 	  end    
 })
+
+
