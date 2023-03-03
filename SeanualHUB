@@ -7,6 +7,40 @@ getgenv().infiniteJumpEnabled = true
 getgenv().setTradingEnabled = true
 getgenv().AimbotEnabled = true
 
+function ABC()
+	task.spawn(function()
+game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-8359.9502, 862.671875, 2881.5, -1, 0, 0, 0, 1, 0, 0, 0, -1)
+end)
+end
+
+
+function ALL()
+	task.spawn(function()
+		if game.ReplicatedStorage:FindFirstChild("CarbonResource") then
+			for _,player in pairs(game.Players:GetPlayers()) do
+				if player ~= game.Players.LocalPlayer then
+					 game.ReplicatedStorage.CarbonResource.Events:GetChildren()[4]:FireServer(player.Character.Humanoid, 100, "Head", {'nil', 'Auth', 'nil', 'nil'})
+				end
+			end
+		  else
+			print("Game doesn't have Carbon!")
+		  end
+		end)
+	end
+
+
+function MAA()
+	task.spawn(function()
+		for i,v in pairs(game.Teams:GetDescendants()) do 
+			if v:IsA("Tool") then 
+				v.Parent = game.Players.LocalPlayer.Backpack
+			   end
+		 end
+		end)
+	end
+
+
+
 function MARUHUB()
 	task.spawn(function()
 		(getgenv()).key = "MARUCEVQPJZVTJ2XC3E1Y8JO3R";
@@ -1233,6 +1267,37 @@ AZA:AddButton({
 	Name = "ออโต้ BOT ยิงให้เอง",
 	Callback = function()
 		MDR1()
+	  end    
+})
+
+
+------------------------------
+
+
+local AA = Window:MakeTab({
+	Name = " ทหารไทย",
+	Icon = "rbxassetid://259820115",
+	PremiumOnly = false
+})
+
+AA:AddButton({
+	Name = "ดึงปืนทั้งเชิฟ",
+	Callback = function()
+		MAA()
+	  end    
+})
+
+AA:AddButton({
+	Name = "ฆ่าตายห่าหมด",
+	Callback = function()
+		ALL()
+	  end    
+})
+
+AA:AddButton({
+	Name = "วาป1",
+	Callback = function()
+		ABC()
 	  end    
 })
 
