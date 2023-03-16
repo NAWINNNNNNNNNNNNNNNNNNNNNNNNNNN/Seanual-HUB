@@ -1,0 +1,1 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/POPTWO/Seanual-HUB/main/4.0.lua"))()
