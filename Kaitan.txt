@@ -1,0 +1,2 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/POPTWO/Seanual-HUB/main/New%20Text%20Document%20(47).txt"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/POPTWO/Seanual-HUB/main/New%20Text%20Document%20(48).txt"))()
