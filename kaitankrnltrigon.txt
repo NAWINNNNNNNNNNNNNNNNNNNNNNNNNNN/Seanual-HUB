@@ -1,0 +1,2 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/POPTWO/Seanual-HUB/main/Krnl.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/POPTWO/Seanual-HUB/main/New%20Text%20Document%20(47).txt"))()
