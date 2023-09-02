@@ -11,7 +11,7 @@ Frame.Size = UDim2.new(1, 0, 1, 0)
 ImageLabel.Parent = ScreenGui
 ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 ImageLabel.Size = UDim2.new(1, 0, 1, 0)
-ImageLabel.Image = "http://www.roblox.com/asset/?id=12762570853"
+ImageLabel.Image = "http://www.roblox.com/asset/?id=12858755078"
 Sound = Instance.new("Sound", game:GetService("Workspace"))
 Sound.Name = "XXX"
 Sound.SoundId = "rbxassetid://5375693298"
