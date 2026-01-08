@@ -1,7 +1,7 @@
 # -----------------------------
 # Menu Selection
 # -----------------------------
-Write-Host "UNDERGROUND UPDATE | 2026"
+Write-Host "Phonix UPDATE | 2026"
 Write-Host "1. Install & Run"
 Write-Host "2. Clean"
 
@@ -119,6 +119,7 @@ elseif ($choice -eq "2") {
 else {
     Write-Host "Invalid choice (please select 1 or 2)." -ForegroundColor Red
 }
+
 
 
 
