@@ -1,0 +1,162 @@
+# รันแบบ Administrator
+
+# ต้องรันแบบ Administrator + ปิดเบราว์เซอร์/โปรแกรมที่เกี่ยวข้องก่อนรัน
+
+# ==============================================
+# โค้ดล้างร่องรอยระบบ Windows + Google Chrome
+# ต้องรันด้วยสิทธิ์ Administrator เท่านั้น
+# ==============================================
+
+Write-Host "เริ่มต้นล้างร่องรอย..." -ForegroundColor Yellow
+
+# 1. ลบ ShimCache (Registry)
+Write-Host "[1/6] ลบ ShimCache..." -ForegroundColor Cyan
+Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache" -Name "AppCompatCache" -ErrorAction SilentlyContinue
+Remove-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache" -Name "Cache" -ErrorAction SilentlyContinue
+
+# 2. ลบ BAM (Background Activity Moderator) - รายการโปรแกรมที่รัน
+Write-Host "[2/6] ลบ BAM และ State Repository..." -ForegroundColor Cyan
+Remove-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\*" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "HKLM:\SYSTEM\CurrentControlSet\Services\bam\State\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+# 3. ล้าง Event Log ทั้งหมด (ระบบ, ความปลอดภัย, แอปพลิเคชัน, Setup, ฯลฯ)
+Write-Host "[3/6] ล้าง Windows Event Log ทั้งหมด..." -ForegroundColor Cyan
+Get-WinEvent -ListLog * | ForEach-Object {
+    try {
+        [System.Diagnostics.Eventing.Reader.EventLogSession]::GlobalSession.ClearLog($_.LogName)
+        Write-Host "  ล้าง $($_.LogName) เรียบร้อย" -ForegroundColor Green
+    } catch {
+        Write-Host "  ข้าม $($_.LogName) (ไม่สามารถล้างได้)" -ForegroundColor Gray
+    }
+}
+
+# 4. ล้าง Recent Documents / Jump Lists
+Write-Host "[4/6] ล้างรายการไฟล์ล่าสุด..." -ForegroundColor Cyan
+Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Recent\*" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Recent\AutomaticDestinations\*" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "$env:APPDATA\Microsoft\Windows\Recent\CustomDestinations\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+# 5. ล้าง PowerShell Command History (ภายใน PowerShell)
+Write-Host "[5/6] ล้าง PowerShell History..." -ForegroundColor Cyan
+Remove-Item -Path "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt" -Force -ErrorAction SilentlyContinue
+Clear-History
+
+# 6. ลบประวัติการค้นหา Google Chrome
+Write-Host "[6/6] ลบประวัติ Google Chrome..." -ForegroundColor Cyan
+
+# ปิด Chrome ก่อนทุกครั้ง
+Get-Process -Name "chrome" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Start-Sleep -Seconds 2
+
+$chromePath = "$env:LOCALAPPDATA\Google\Chrome\User Data\Default"
+if (Test-Path $chromePath) {
+    # ลบไฟล์ประวัติหลัก
+    Remove-Item -Path "$chromePath\History" -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "$chromePath\History-journal" -Force -ErrorAction SilentlyContinue
+    
+    # ลบ Cache และ Cookies (เพิ่มเติม)
+    Remove-Item -Path "$chromePath\Cache\*" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "$chromePath\Code Cache\*" -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "$chromePath\Cookies" -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "$chromePath\Cookies-journal" -Force -ErrorAction SilentlyContinue
+    
+    Write-Host "  ลบประวัติ Chrome เรียบร้อย" -ForegroundColor Green
+} else {
+    Write-Host "  ไม่พบโฟลเดอร์ Chrome Default (อาจไม่มีการติดตั้ง)" -ForegroundColor Gray
+}
+
+Write-Host "`n===== เสร็จสิ้น! =====`n" -ForegroundColor Yellow
+Write-Host "คำแนะนำเพิ่มเติม:" -ForegroundColor White
+Write-Host "- รีสตาร์ทเครื่องเพื่อให้การเปลี่ยนแปลงสมบูรณ์" -ForegroundColor White
+Write-Host "- ถ้าต้องการลบไฟล์ Prefetch (C:\Windows\Prefetch) ให้รันเพิ่มเติมด้วยคำสั่ง:" -ForegroundColor White
+Write-Host "  Remove-Item C:\Windows\Prefetch\* -Recurse -Force -ErrorAction SilentlyContinue" -ForegroundColor Gray
+Write-Host "- ถ้าต้องการลบไฟล์ Temp ทั้งหมด:" -ForegroundColor White
+Write-Host "  Remove-Item C:\Users\$env:USERNAME\AppData\Local\Temp\* -Recurse -Force -ErrorAction SilentlyContinue" -ForegroundColor Gray
+
+# จบสคริปต์
+
+Get-Process chrome, msedge, firefox, brave, opera -ErrorAction SilentlyContinue | Stop-Process -Force
+
+# === 1) Run dialog / RecentDocs / Explorer address bar ===
+Remove-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU\*" -Force -ErrorAction SilentlyContinue
+Remove-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs\*" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths\*" -Force -ErrorAction SilentlyContinue
+Remove-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\WordWheelQuery\*" -Force -ErrorAction SilentlyContinue
+
+# === 2) Jump Lists / Recent items ===
+Remove-Item "$env:APPDATA\Microsoft\Windows\Recent\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+# === 3) รายการโปรแกรมที่เพิ่งเปิด (Start Menu) ===
+Remove-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+# === 4) Thumbnail cache / Icon cache ===
+Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:LOCALAPPDATA\Microsoft\Windows\Explorer\thumbcache_*.db" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:LOCALAPPDATA\IconCache.db" -Force -ErrorAction SilentlyContinue
+
+# === 5) PowerShell command history ===
+Remove-Item (Get-PSReadlineOption).HistorySavePath -Force -ErrorAction SilentlyContinue
+Clear-History -ErrorAction SilentlyContinue
+
+# === 6) Clipboard ===
+Set-Clipboard -Value $null -ErrorAction SilentlyContinue
+
+# === 7) เบราว์เซอร์ทุกตัวที่มักติดตั้ง: Chrome, Edge, Firefox, Brave, Opera ===
+$browserProfiles = @(
+    "$env:LOCALAPPDATA\Google\Chrome\User Data\*",
+    "$env:LOCALAPPDATA\Microsoft\Edge\User Data\*",
+    "$env:LOCALAPPDATA\BraveSoftware\Brave-Browser\User Data\*",
+    "$env:APPDATA\Opera Software\Opera Stable"
+)
+foreach ($base in $browserProfiles) {
+    Get-ChildItem $base -ErrorAction SilentlyContinue -Directory | ForEach-Object {
+        Remove-Item "$($_.FullName)\History" -Force -ErrorAction SilentlyContinue
+        Remove-Item "$($_.FullName)\Web Data" -Force -ErrorAction SilentlyContinue
+        Remove-Item "$($_.FullName)\Top Sites" -Force -ErrorAction SilentlyContinue
+        Remove-Item "$($_.FullName)\Shortcuts" -Force -ErrorAction SilentlyContinue
+        Remove-Item "$($_.FullName)\Visited Links" -Force -ErrorAction SilentlyContinue
+    }
+}
+
+# Firefox (โครงสร้าง profile ต่างจากตัวอื่น)
+$ffProfiles = Get-ChildItem "$env:APPDATA\Mozilla\Firefox\Profiles" -ErrorAction SilentlyContinue -Directory
+foreach ($p in $ffProfiles) {
+    Remove-Item "$($p.FullName)\places.sqlite" -Force -ErrorAction SilentlyContinue
+}
+
+# === 8) Recent files ใน Microsoft Office ===
+Remove-Item "HKCU:\Software\Microsoft\Office\*\*\User MRU\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+Start-Process explorer
+Write-Host "ล้างประวัติแบบละเอียดเรียบร้อยแล้ว — แนะนำรีสตาร์ทเครื่องเพื่อความชัวร์" -ForegroundColor Green
+
+# ปิด Explorer ชั่วคราว (จำเป็นสำหรับล้าง cache บางตัว)
+Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+
+# === 1) UserAssist (บันทึกโปรแกรม/exe ที่เปิดจาก Start Menu, Desktop) ===
+Remove-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+# === 2) Prefetch (Windows เก็บไฟล์ .pf ทุกครั้งที่รัน exe เพื่อเร่งการโหลด) ===
+Remove-Item "$env:WINDIR\Prefetch\*.pf" -Force -ErrorAction SilentlyContinue
+
+# === 3) ShimCache / AppCompatCache (เก็บ path + timestamp ของ exe ที่เคยรัน) ===
+# ต้อง reboot ถึงจะมีผลจริง เพราะข้อมูลนี้ล็อกอยู่ใน memory ของ kernel ด้วย
+Remove-Item "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\AppCompatCache" -Recurse -Force -ErrorAction SilentlyContinue
+
+# === 4) BAM/DAM (Background Activity Moderator — Win10/11 บันทึกว่า exe ไหนรันเมื่อไหร่) ===
+Remove-Item "HKLM:\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings\*" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "HKLM:\SYSTEM\CurrentControlSet\Services\dam\State\UserSettings\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+# === 5) RunMRU (Win+R history) ===
+Remove-Item "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU\*" -Force -ErrorAction SilentlyContinue
+
+# === 6) Jump Lists (โปรแกรมที่เปิดล่าสุดจาก Taskbar) ===
+Remove-Item "$env:APPDATA\Microsoft\Windows\Recent\AutomaticDestinations\*" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:APPDATA\Microsoft\Windows\Recent\CustomDestinations\*" -Force -ErrorAction SilentlyContinue
+
+# === 7) Windows Event Logs ที่เกี่ยวกับ process creation (Event ID 4688, Application log) ===
+wevtutil el | ForEach-Object { wevtutil cl "$_" } 2>$null
+
+
+Start-Process explorer
+Write-Host "ล้างประวัติการรัน .exe ที่จุดหลักทั้งหมดแล้ว — รีสตาร์ทเครื่องเพื่อให้ ShimCache/BAM เคลียร์เต็มที่" -ForegroundColor Green
